@@ -5,7 +5,7 @@ class Ping(commands.Cog):
         self.bot = bot
 
     @discord.app_commands.command(name = 'ping', description = 'Kiểm tra độ trễ của bot tới Discord')
-    async def ping(self, ctx):
+    async def ping(self, interaction: discord.Interaction):
         latency = round(self.bot.latency * 1000)
         await interaction.response.send_message(f'Pong! 🏓 {latency}ms')
 
