@@ -9,8 +9,8 @@ token = os.getenv('DISCORD_TOKEN')
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
-intents.message_content = true
-intents.members = true
+intents.message_content = True
+intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -18,4 +18,5 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
 	print(f"We are ready to go in, {bot.user.name}")
 	
+
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
