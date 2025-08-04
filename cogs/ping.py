@@ -10,8 +10,5 @@ class Ping(commands.Cog):
         latency = round(self.bot.latency * 1000)
         await interaction.response.send_message(f'Pong! 🏓 {latency}ms')
 
-    async def cog_load(self):
-        await self.bot.tree.sync()
-
 async def setup(bot):
     await bot.add_cog(Ping(bot))
