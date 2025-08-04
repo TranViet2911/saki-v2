@@ -27,15 +27,7 @@ async def on_ready():
     print(f"{bot.user.name} đã được khởi động!")
     
 # Load Cogs
-
-async def main():
-    async with bot:
-        await bot.load_extension('ping')  # or 'cogs.ping'
-        await bot.start(token)
-
-import asyncio
-asyncio.run(main())
-
+bot.load_extensions('cogs.ping')
 
 # Rena gay :)
 @bot.event
