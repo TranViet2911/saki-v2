@@ -6,4 +6,4 @@ from discord.ext import commands
         await ctx.send(f'Pong! 🏓 {latency}ms')
 
 async def setup(bot):
-    await bot.add_cog(Ping(bot))
+    bot.add_cog(Ping(bot))
