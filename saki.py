@@ -40,8 +40,8 @@ async def on_message(message):
 	if message.author == bot.user:
 		return
 		
-	if "rena" in message.content.strip().lower():
-		await message.channel.send(f"gay")
-	
+	if message.content.strip().lower() == "rena":
+        await message.channel.send("gay")
+ 
 	await bot.process_commands(message)
 bot.run(token)
