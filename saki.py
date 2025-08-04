@@ -20,6 +20,9 @@ bot = commands.Bot(command_prefix='!', intents=intents, application_id=140189533
 
 @bot.event
 async def on_ready():
+    activity = discord.Game(name="Saki Renewed | discord.gg/vietrhythm")
+    await bot.change_presence(activity=activity)
+
     print(f"{bot.user.name} đã được khởi động!")
     try:
         synced = await bot.tree.sync()
