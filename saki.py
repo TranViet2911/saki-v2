@@ -43,7 +43,6 @@ async def on_message(message):
 
 async def main():
     await bot.load_extension('cogs.ping')
-    await bot.load_extension('cogs.rpc')
     await bot.start(token)
 
 if __name__ == "__main__":
