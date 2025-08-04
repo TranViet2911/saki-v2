@@ -12,5 +12,5 @@ class Ping(commands.Cog):
 		async def cog_load(self):
         await self.bot.tree.sync()
 
-async def setup(bot):
-    await bot.add_cog(Ping(bot))
+		async def setup(bot):
+    		await bot.add_cog(Ping(bot))
