@@ -21,6 +21,11 @@ bot = commands.Bot(command_prefix='!', intents=intents, application_id=140189533
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} đã được khởi động!")
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} slash command(s) globally.")
+    except Exception as e:
+        print(f"Error syncing commands: {e}")
 
 @bot.event
 async def on_message(message):
