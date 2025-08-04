@@ -40,7 +40,7 @@ async def on_message(message):
 	if message.author == bot.user:
 		return
 		
-	if "rena" in message.content.lower():
+	if "rena" in message.content.strip().lower():
 		await message.channel.send(f"gay")
 	
 	await bot.process_commands(message)
