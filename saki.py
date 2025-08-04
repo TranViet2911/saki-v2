@@ -4,6 +4,7 @@ import logging
 from dotenv import load_dotenv
 import os
 import asyncio
+from discord import app_commands
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
