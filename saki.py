@@ -18,6 +18,8 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+application_id=1401895339702747156
+
 @bot.event
 async def on_ready():
     print(f"{bot.user.name} đã được khởi động!")
