@@ -28,10 +28,14 @@ async def on_ready():
     
 # Load Cogs
 
-bot.load_extension('cogs.ping')
-async def setup(bot):
-    print("Ping cog loaded!")  # For debugging
-    await bot.add_cog(Ping(bot))
+async def main():
+    async with bot:
+        await bot.load_extension('ping')  # or 'cogs.ping'
+        await bot.start(token)
+
+import asyncio
+asyncio.run(main())
+
 
 # Rena gay :)
 @bot.event
