@@ -29,6 +29,9 @@ async def on_ready():
 # Load Cogs
 
 bot.load_extension('cogs.ping')
+async def setup(bot):
+    print("Ping cog loaded!")  # For debugging
+    await bot.add_cog(Ping(bot))
 
 # Rena gay :)
 @bot.event
