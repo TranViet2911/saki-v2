@@ -27,7 +27,7 @@ async def on_ready():
     print(f"{bot.user.name} đã được khởi động!")
     
 # Load Cogs
-bot.load_extension('cogs.ping')
+await bot.load_extension('cogs.ping')
 
 # Rena gay :)
 @bot.event
