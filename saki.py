@@ -30,7 +30,7 @@ async def on_ready():
     print(f"{bot.user.name} đã được khởi động!")
     try:
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} slash command(s) globally.")
+        print(f"Đã đồng bộ bóa {len(synced)} lệnh gạch chéo toàn cầu.")
     except Exception as e:
         print(f"Error syncing commands: {e}")
 
@@ -49,6 +49,7 @@ async def on_message(message):
 # Load Cogs
 async def main():
     await bot.load_extension('cogs.ping')
+    await bot.load_extension('cogs.welcome')
     await bot.start(token)
 
 if __name__ == "__main__":
