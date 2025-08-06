@@ -1,56 +1,45 @@
 import discord
 from discord.ext import commands
-import logging
-from dotenv import load_dotenv
-import os
-import asyncio
-from discord import app_commands
 
-# Load the bot
-load_dotenv()
-token = os.getenv('DISCORD_TOKEN')
+class AFK(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.afk_users = {}  # {user_id: reason}
 
-# Setup Logging
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    # Slash command to set AFK
+    @discord.app_commands.command(name="afk", description="Set your AFK status")
+    async def afk(self, interaction: discord.Interaction, reason: str = "AFK"):
+        self.afk_users[interaction.user.id] = reason
+        await interaction.response.send_message(
+            f"{interaction.user.mention} is now AFK: {reason}", ephemeral=False
+        )
 
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
+    # Listen for messages to clear AFK and notify if AFK user is mentioned
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
 
-# Prefix and Application ID for slash command
-bot = commands.Bot(command_prefix='!', intents=intents, application_id=1401895339702747156)
+        # Remove AFK if user sends a message
+        if message.author.id in self.afk_users:
+            del self.afk_users[message.author.id]
+            await message.channel.send(
+                f"Welcome back, {message.author.mention}! You are no longer AFK."
+            )
 
-# Activity and Sync
-@bot.event
-async def on_ready():
-    activity = discord.Game(name="Saki Renewed | discord.gg/vietrhythm")
-    await bot.change_presence(activity=activity)
+        # Notify if any AFK user is mentioned
+        for user in message.mentions:
+            if user.id in self.afk_users:
+                reason = self.afk_users[user.id]
+                await message.channel.send(
+                    f"{user.display_name} is AFK: {reason}"
+                )
 
-    print(f"{bot.user.name} đã được khởi động!")
-    try:
-        synced = await bot.tree.sync()
-        print(f"Đã đồng bộ bóa {len(synced)} lệnh gạch chéo toàn cầu.")
-    except Exception as e:
-        print(f"Error syncing commands: {e}")
+        await self.bot.process_commands(message)
 
-# Rena gay
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
+    async def cog_load(self):
+        # This is only needed if you define commands dynamically.
+        pass  # No need for self.bot.tree.add_command(self.afk); decorator handles registration.
 
-    # Only trigger if message is exactly "rena" (case-insensitive)
-    if message.content.strip().lower() == "rena":
-        await message.channel.send("gay")
-
-    await bot.process_commands(message)
-
-# Load Cogs
-async def main():
-    await bot.load_extension('cogs.ping')
-    await bot.load_extension('cogs.welcome')
-    await bot.start(token)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+async def setup(bot):
+    await bot.add_cog(AFK(bot))
