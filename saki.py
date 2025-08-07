@@ -40,7 +40,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    # Only trigger if message is exactly "rena" (case-insensitive)
+    # chỉ trigger nếu rena đc detect
     if message.content.strip().lower() == "rena":
         await message.channel.send("gay")
 
