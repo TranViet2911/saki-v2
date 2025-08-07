@@ -14,13 +14,13 @@ async def on_member_join(self, member: discord.Member):
     channel_id = 1240680129714196520
     image_filename = "image.png"
 
-    # --- Channel check ---
+    # --- Channel ---
     welcome_channel = member.guild.get_channel(channel_id)
     if not welcome_channel:
         print(f"[ERROR] Channel ID {channel_id} not found in guild {member.guild.name}.")
         return
 
-    # --- Image check ---
+    # --- Kiểm tra đg dẫn ảnh---
     image_path = f"./cogs/image/{image_filename}"
     if not os.path.exists(image_path):
         print(f"[ERROR] Image {image_path} not found.")
@@ -29,15 +29,15 @@ async def on_member_join(self, member: discord.Member):
     try:
         print(f"[DEBUG] Member joined: {member.name}")
 
-        # --- Avatar processing ---
+        # --- Avatar---
         avatar_url = str(member.avatar.url)
         avatar_image = await load_image_async(avatar_url)
         avatar = Editor(avatar_image).resize((250, 250)).circle_image()
 
-        # --- Background processing ---
+        # --- Bg---
         bg = Editor(image_path)
 
-        # --- Fonts ---
+        # --- Font---
         try:
             font_big = font.load_default(size=90, variant="bold")
             font_small = font.load_default(size=60, variant="bold")
@@ -46,19 +46,19 @@ async def on_member_join(self, member: discord.Member):
             font_big = font.load_default()
             font_small = font.load_default()
 
-        # --- Compose image ---
+        # --- Xử lý ảnh---
         bg.paste(avatar, (835, 340))
         bg.ellipse((835, 340), 250, 250, outline="white", stroke_width=5)
         bg.text((960, 620), f"Welcome to {member.guild.name}!", color="white", font=font_big, align="center")
         bg.text((960, 740), f"{member.name} is member #{member.guild.member_count}!", color="white", font=font_small, align="center")
 
-        # --- Save image to BytesIO ---
+        # ---lưu ảnh---
         image_bytes = BytesIO()
         bg.image.save(image_bytes, format="PNG")
         image_bytes.seek(0)
         bg_file = discord.File(fp=image_bytes, filename=image_filename)
 
-        # --- Send message and image ---
+        # --- gửi ---
         await welcome_channel.send(f"Thanks for joining {member.guild.name}, {member.name}!")
         await welcome_channel.send(file=bg_file)
         print(f"[DEBUG] Welcome image sent for {member.name} in {welcome_channel.name}")
