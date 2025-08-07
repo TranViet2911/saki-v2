@@ -11,8 +11,8 @@ class Welcome(commands.Cog):
 @commands.Cog.listener()
 async def on_member_join(self, member: discord.Member):
     # --- CONFIG ---
-    channel_id = 1240680129714196520  # <-- Replace with your actual channel ID!
-    image_filename = "welcome.png"    # <-- Set your desired image filename here
+    channel_id = 1240680129714196520
+    image_filename = "image.png"
 
     # --- Channel check ---
     welcome_channel = member.guild.get_channel(channel_id)
@@ -67,5 +67,4 @@ async def on_member_join(self, member: discord.Member):
         print("[ERROR] Exception in welcome cog:", e)
         
 async def setup(bot):
-
     await bot.add_cog(Welcome(bot))
