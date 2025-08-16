@@ -62,17 +62,32 @@ class Leveling(commands.Cog):
         
         level, xp = add_xp(message.author.id, XP_PER_MESSAGE)
 
-        if xp == XP_PER_MESSAGE and level == 1:  # first record
+        # 🎉 First record
+        if xp == XP_PER_MESSAGE and level == 1:
             await message.channel.send(f"🎉 {message.author.mention} started their journey at **Level 1**!")
-        elif xp == 0:  # leveled up
-            await message.channel.send(f"🔥 {message.author.mention} leveled up to **Level {level}!**")
+
+        # 🔥 Level up
+        elif xp == 0:
+            # Find rank of the user
+            c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
+            all_users = [row[0] for row in c.fetchall()]
+            rank = all_users.index(message.author.id) + 1  # 1-based rank
+
+            # Custom embed
+            embed = discord.Embed(
+                title="<:lightpinkflower:1406242431640277002> Level Up!",
+                description=f"{message.author.mention} leveled up to **Level {level}!**\n<a:trophy:1406253183227138078> Rank: {rank}",
+                colour=0x00b0f4
+            )
+            embed.set_thumbnail(url=message.author.display_avatar.url)
+
+            await message.channel.send(embed=embed)
 
     # ------------------------------
     # Slash Commands
     # ------------------------------
     @commands.Cog.listener()
     async def on_ready(self):
-        # sync commands globally
         try:
             synced = await self.bot.tree.sync()
             print(f"✅ Synced {len(synced)} slash commands")
