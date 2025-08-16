@@ -43,35 +43,84 @@ def add_xp(user_id, xp):
             conn.commit()
             return current_level, new_xp
 
+def get_top_users(limit=10):
+    c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
+    return c.fetchall()
+
 
 class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # ------------------------------
+    # XP Gain Listener
+    # ------------------------------
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
             return
         
         level, xp = add_xp(message.author.id, XP_PER_MESSAGE)
-        xp_needed = level * LEVEL_UP_MULTIPLIER
 
         if xp == XP_PER_MESSAGE and level == 1:  # first record
             await message.channel.send(f"🎉 {message.author.mention} started their journey at **Level 1**!")
-        elif xp == 0:  # means leveled up
+        elif xp == 0:  # leveled up
             await message.channel.send(f"🔥 {message.author.mention} leveled up to **Level {level}!**")
 
-    @commands.command()
-    async def level(self, ctx, member: discord.Member = None):
-        """Check your level"""
-        member = member or ctx.author
+    # ------------------------------
+    # Slash Commands
+    # ------------------------------
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # sync commands globally
+        try:
+            synced = await self.bot.tree.sync()
+            print(f"✅ Synced {len(synced)} slash commands")
+        except Exception as e:
+            print(f"⚠ Failed to sync commands: {e}")
+
+    @discord.app_commands.command(name="level", description="Check your or another user's level")
+    async def level(self, interaction: discord.Interaction, member: discord.Member = None):
+        member = member or interaction.user
         user = get_user(member.id)
         if user:
             xp, level = user[1], user[2]
             xp_needed = level * LEVEL_UP_MULTIPLIER
-            await ctx.send(f"📊 {member.mention} is **Level {level}** with **{xp}/{xp_needed} XP**.")
+            await interaction.response.send_message(
+                f"📊 {member.mention} is **Level {level}** with **{xp}/{xp_needed} XP**."
+            )
         else:
-            await ctx.send(f"{member.mention} hasn’t started gaining XP yet!")
+            await interaction.response.send_message(f"{member.mention} hasn’t started gaining XP yet!")
+
+    @discord.app_commands.command(name="xp", description="Check your or another user's exact XP")
+    async def xp(self, interaction: discord.Interaction, member: discord.Member = None):
+        member = member or interaction.user
+        user = get_user(member.id)
+        if user:
+            xp, level = user[1], user[2]
+            await interaction.response.send_message(f"🔢 {member.mention} has **{xp} XP** (Level {level}).")
+        else:
+            await interaction.response.send_message(f"{member.mention} hasn’t gained any XP yet.")
+
+    @discord.app_commands.command(name="leaderboard", description="Show top 10 users by level and XP")
+    async def leaderboard(self, interaction: discord.Interaction):
+        top_users = get_top_users(10)
+        if not top_users:
+            return await interaction.response.send_message("⚠ No data available yet.")
+
+        embed = discord.Embed(title="🏆 Leaderboard", color=discord.Color.gold())
+        rank = 1
+        for user_id, xp, level in top_users:
+            member = interaction.guild.get_member(user_id)
+            name = member.name if member else f"User ID {user_id}"
+            embed.add_field(
+                name=f"#{rank} {name}",
+                value=f"⭐ Level {level} | {xp} XP",
+                inline=False
+            )
+            rank += 1
+
+        await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot):
