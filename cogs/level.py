@@ -47,6 +47,14 @@ def get_top_users(limit=10):
     c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
     return c.fetchall()
 
+# ------------------------------
+# PROGRESS BAR
+# ------------------------------
+def make_progress_bar(xp, xp_needed, length=10):
+    progress = int((xp / xp_needed) * length) if xp_needed > 0 else 0
+    bar = "▓" * progress + "░" * (length - progress)
+    percent = int((xp / xp_needed) * 100) if xp_needed > 0 else 0
+    return f"{bar} {percent}%"
 
 class Leveling(commands.Cog):
     def __init__(self, bot):
@@ -68,19 +76,25 @@ class Leveling(commands.Cog):
 
         # 🔥 Level up
         elif xp == 0:
-            # Find rank of the user
             c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
             all_users = [row[0] for row in c.fetchall()]
-            rank = all_users.index(message.author.id) + 1  # 1-based rank
+            rank = all_users.index(message.author.id) + 1
 
-            # Custom embed
+            xp_needed = level * LEVEL_UP_MULTIPLIER
+            progress = make_progress_bar(xp, xp_needed)
+
             embed = discord.Embed(
                 title="<:lightpinkflower:1406242431640277002> Level Up!",
-                description=f"{message.author.mention} leveled up to **Level {level}!**\n<a:trophy:1406253183227138078> Rank: {rank}\n<:xp:1406259092309282978> Your XP: {xp}/{xp_needed}",
+                description=(
+                    f"{message.author.mention} leveled up to **Level {level}!**\n"
+                    f"<a:trophy:1406253183227138078> Rank: {rank}\n"
+                    f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
+                    f"{progress}"
+                ),
                 colour=0x00b0f4
             )
             embed.set_thumbnail(url=message.author.display_avatar.url)
-embed.set_footer(text="Saki 2.0 / Made by Groovy")
+            embed.set_footer(text="Saki 2.0 / Made by Groovy")
 
             await message.channel.send(embed=embed)
 
@@ -102,9 +116,20 @@ embed.set_footer(text="Saki 2.0 / Made by Groovy")
         if user:
             xp, level = user[1], user[2]
             xp_needed = level * LEVEL_UP_MULTIPLIER
-            await interaction.response.send_message(
-                f"📊 {member.mention} is **Level {level}** with **{xp}/{xp_needed} XP**."
+            progress = make_progress_bar(xp, xp_needed)
+
+            embed = discord.Embed(
+                title=f"📊 {member.name}'s Level",
+                description=(
+                    f"{member.mention} is **Level {level}**\n"
+                    f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
+                    f"{progress}"
+                ),
+                color=0x00b0f4
             )
+            embed.set_thumbnail(url=member.display_avatar.url)
+            embed.set_footer(text="Saki 2.0 / Made by Groovy")
+            await interaction.response.send_message(embed=embed)
         else:
             await interaction.response.send_message(f"{member.mention} hasn’t started gaining XP yet!")
 
@@ -114,7 +139,20 @@ embed.set_footer(text="Saki 2.0 / Made by Groovy")
         user = get_user(member.id)
         if user:
             xp, level = user[1], user[2]
-            await interaction.response.send_message(f"🔢 {member.mention} has **{xp} XP** (Level {level}).")
+            xp_needed = level * LEVEL_UP_MULTIPLIER
+            progress = make_progress_bar(xp, xp_needed)
+
+            embed = discord.Embed(
+                title=f"🔢 {member.name}'s XP",
+                description=(
+                    f"{member.mention} has **{xp} XP** (Level {level}).\n"
+                    f"{progress}"
+                ),
+                color=0x00b0f4
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
+            embed.set_footer(text="Saki 2.0 / Made by Groovy")
+            await interaction.response.send_message(embed=embed)
         else:
             await interaction.response.send_message(f"{member.mention} hasn’t gained any XP yet.")
 
@@ -129,13 +167,17 @@ embed.set_footer(text="Saki 2.0 / Made by Groovy")
         for user_id, xp, level in top_users:
             member = interaction.guild.get_member(user_id)
             name = member.name if member else f"User ID {user_id}"
+            xp_needed = level * LEVEL_UP_MULTIPLIER
+            progress = make_progress_bar(xp, xp_needed)
+
             embed.add_field(
                 name=f"#{rank} {name}",
-                value=f"⭐ Level {level} | {xp} XP",
+                value=f"⭐ Level {level} | <:xp:1406259092309282978> {xp}/{xp_needed}\n{progress}",
                 inline=False
             )
             rank += 1
 
+        embed.set_footer(text="Saki 2.0 / Made by Groovy")
         await interaction.response.send_message(embed=embed)
 
 
