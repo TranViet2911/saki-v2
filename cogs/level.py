@@ -8,7 +8,7 @@ LEVEL_UP_MULTIPLIER = 100
 # ------------------------------
 # DATABASE SETUP
 # ------------------------------
-conn = sqlite3.connect("levels.db")
+conn = sqlite3.connect("s2430_Saki.db")
 c = conn.cursor()
 c.execute("""CREATE TABLE IF NOT EXISTS levels (
                 user_id INTEGER PRIMARY KEY,
