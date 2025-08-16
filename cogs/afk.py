@@ -10,7 +10,7 @@ class AFK(commands.Cog):
 
         self.afk_users = {}  # {user_id: reason}
 
-    # Slash command
+    # Slash command to set AFK
 
     @discord.app_commands.command(name="afk", description="Set your AFK status")
 
@@ -24,7 +24,7 @@ class AFK(commands.Cog):
 
         )
 
-    # Check tin nhắn để xóa afk
+    # Listen for messages to clear AFK and notify if AFK user is mentioned
 
     @commands.Cog.listener()
 
@@ -34,7 +34,7 @@ class AFK(commands.Cog):
 
             return
 
-        # xóa afk khi kiểm tra đc tin nhắn gửi đi
+        # Remove AFK if user sends a message
 
         if message.author.id in self.afk_users:
 
@@ -46,7 +46,7 @@ class AFK(commands.Cog):
 
             )
 
-        # Tbao nếu bất cứ ng nào ping afk
+        # Notify if any AFK user is mentioned
 
         for user in message.mentions:
 
@@ -64,8 +64,10 @@ class AFK(commands.Cog):
 
     async def cog_load(self):
 
+        # This is only needed if you define commands dynamically.
 
-        pass self.bot.tree.add_command(self.afk);
+        pass  # No need for self.bot.tree.add_command(self.afk); decorator handles registration.
 
 async def setup(bot):
+
     await bot.add_cog(AFK(bot))
