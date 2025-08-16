@@ -5,7 +5,7 @@ import random
 
 XP_MIN = 10
 XP_MAX = 20
-LEVEL_UP_MULTIPLIER = 100
+LEVEL_UP_MULTIPLIER = 500
 
 # ------------------------------
 # DATABASE SETUP
@@ -130,7 +130,6 @@ class Leveling(commands.Cog):
                 title=f"📊 {member.name}'s Level",
                 description=(
                     f"{member.mention} is **Level {level}**\n"
-                    f"<a:trophy:1406253183227138078> Leaderboard Rank: {rank}\n"
                     f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
                     f"{progress}"
                 ),
@@ -154,7 +153,7 @@ class Leveling(commands.Cog):
         if not top_users:
             return await interaction.response.send_message("⚠ No data available yet.")
 
-        embed = discord.Embed(title="🏆 Leaderboard", color=discord.Color.blue())
+        embed = discord.Embed(title="🏆 Leaderboard", color=discord.Color.gold())
         rank = 1
         for user_id, xp, level in top_users:
             member = interaction.guild.get_member(user_id)
@@ -170,32 +169,6 @@ class Leveling(commands.Cog):
             rank += 1
 
         embed.set_footer(text="Saki 2.0 / Made by Groovy")
-        await interaction.response.send_message(embed=embed)
-
-
-async def setup(bot):
-    await bot.add_cog(Leveling(bot))
-
-            )
-
-    @discord.app_commands.command(name="leaderboard", description="Show top 10 users by level and XP")
-    async def leaderboard(self, interaction: discord.Interaction):
-        top_users = get_top_users(10)
-        if not top_users:
-            return await interaction.response.send_message("⚠ No data available yet.")
-
-        embed = discord.Embed(title="🏆 Leaderboard", color=discord.Color.blue())
-        rank = 1
-        for user_id, xp, level in top_users:
-            member = interaction.guild.get_member(user_id)
-            name = member.name if member else f"User ID {user_id}"
-            embed.add_field(
-                name=f"#{rank} {name}",
-                value=f"⭐ Level {level} | {xp} XP",
-                inline=False
-            )
-            rank += 1
-
         await interaction.response.send_message(embed=embed)
 
 
