@@ -80,6 +80,7 @@ class Leveling(commands.Cog):
                 colour=0x00b0f4
             )
             embed.set_thumbnail(url=message.author.display_avatar.url)
+embed.set_footer(text="Saki 2.0 / Made by Groovy")
 
             await message.channel.send(embed=embed)
 
