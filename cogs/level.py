@@ -76,7 +76,7 @@ class Leveling(commands.Cog):
             # Custom embed
             embed = discord.Embed(
                 title="<:lightpinkflower:1406242431640277002> Level Up!",
-                description=f"{message.author.mention} leveled up to **Level {level}!**\n<a:trophy:1406253183227138078> Rank: {rank}",
+                description=f"{message.author.mention} leveled up to **Level {level}!**\n<a:trophy:1406253183227138078> Rank: {rank}\n<:xp:1406259092309282978> Your XP: {xp}/{xp_needed}",
                 colour=0x00b0f4
             )
             embed.set_thumbnail(url=message.author.display_avatar.url)
