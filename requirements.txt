@@ -2,4 +2,3 @@ discord.py
 python-dotenv
 discord-rich-presence
 easy-pil
-sqlite3
