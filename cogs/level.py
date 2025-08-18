@@ -96,13 +96,12 @@ class Leveling(commands.Cog):
                 description=(
                     f"{message.author.mention} leveled up to **Level {level}!**\n"
                     f"<a:trophy:1406253183227138078> Rank: {rank}\n"
-                    f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
                     f"{progress}"
                 ),
                 colour=0x00b0f4
             )
             embed.set_thumbnail(url=message.author.display_avatar.url)
-            embed.set_footer(text="Saki 2.0 / Made by Groovy")
+            embed.set_footer(text="Saki 2.0 | Made by Groovy")
 
             await message.channel.send(embed=embed)
 
@@ -126,17 +125,23 @@ class Leveling(commands.Cog):
             xp_needed = level * LEVEL_UP_MULTIPLIER
             progress = make_progress_bar(xp, xp_needed)
 
+            # Calculate rank
+            c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
+            all_users = [row[0] for row in c.fetchall()]
+            rank = all_users.index(member.id) + 1 if member.id in all_users else "N/A"
+
             embed = discord.Embed(
-                title=f"📊 {member.name}'s Level",
+                title=f"<:lightpinkflower:1406242431640277002> {member.name}'s Stats",
                 description=(
                     f"{member.mention} is **Level {level}**\n"
+                    f"<a:trophy:1406253183227138078> Rank: {rank}\n"
                     f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
                     f"{progress}"
                 ),
                 color=0x00b0f4
             )
             embed.set_thumbnail(url=member.display_avatar.url)
-            embed.set_footer(text="Saki 2.0 / Made by Groovy")
+            embed.set_footer(text="Saki 2.0 | Made by Groovy")
             await interaction.response.send_message(embed=embed)
         else:
             await interaction.response.send_message(f"{member.mention} hasn’t started gaining XP yet!")
@@ -153,7 +158,10 @@ class Leveling(commands.Cog):
         if not top_users:
             return await interaction.response.send_message("⚠ No data available yet.")
 
-        embed = discord.Embed(title="🏆 Leaderboard", color=discord.Color.gold())
+        embed = discord.Embed(
+            title=f"🏆 {interaction.guild.name}'s Leaderboard",
+            color=discord.Color.gold()
+        )
         rank = 1
         for user_id, xp, level in top_users:
             member = interaction.guild.get_member(user_id)
@@ -168,7 +176,9 @@ class Leveling(commands.Cog):
             )
             rank += 1
 
-        embed.set_footer(text="Saki 2.0 / Made by Groovy")
+        if interaction.guild.icon:
+            embed.set_thumbnail(url=interaction.guild.icon.url)
+        embed.set_footer(text="Saki 2.0 | Made by Groovy")
         await interaction.response.send_message(embed=embed)
 
 
