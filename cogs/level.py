@@ -49,6 +49,11 @@ def reset_user(user_id):
     c.execute("UPDATE levels SET xp = 0, level = 1 WHERE user_id = ?", (user_id,))
     conn.commit()
 
+def reset_all_users():
+    """Reset all users to Level 1 and 1 XP"""
+    c.execute("UPDATE levels SET xp = 1, level = 1")
+    conn.commit()
+
 def get_top_users(limit=10):
     c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
     return c.fetchall()
@@ -151,6 +156,12 @@ class Leveling(commands.Cog):
     async def resetstat(self, interaction: discord.Interaction, member: discord.Member):
         reset_user(member.id)
         await interaction.response.send_message(f"♻ {member.mention}'s stats have been reset to **Level 1** with **0 XP**.")
+
+    @discord.app_commands.command(name="resetall", description="Reset ALL users to Level 1 and 1 XP (Admin only)")
+    @commands.has_permissions(administrator=True)
+    async def resetall(self, interaction: discord.Interaction):
+        reset_all_users()
+        await interaction.response.send_message("♻ All users have been reset to **Level 1** with **1 XP**.")
 
     @discord.app_commands.command(name="leaderboard", description="Show top 10 users by level and XP")
     async def leaderboard(self, interaction: discord.Interaction):
