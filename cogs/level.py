@@ -5,7 +5,7 @@ import random
 
 XP_MIN = 10
 XP_MAX = 20
-LEVEL_UP_MULTIPLIER = 250
+LEVEL_UP_MULTIPLIER = 500
 
 # ------------------------------
 # DATABASE SETUP
@@ -135,7 +135,8 @@ class Leveling(commands.Cog):
                 description=(
                     f"{member.mention} is **Level {level}**\n"
                     f"<a:trophy:1406253183227138078> Rank: {rank}\n"
-                    f"<:xp:1406259092309282978> {xp}/{xp_needed} | {progress}"
+                    f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
+                    f"{progress}"
                 ),
                 color=0x00b0f4
             )
