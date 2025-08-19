@@ -5,7 +5,7 @@ import random
 
 XP_MIN = 10
 XP_MAX = 20
-LEVEL_UP_MULTIPLIER = 500
+LEVEL_UP_MULTIPLIER = 250
 
 # ------------------------------
 # DATABASE SETUP
