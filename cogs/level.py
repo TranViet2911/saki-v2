@@ -80,7 +80,7 @@ class Leveling(commands.Cog):
 
         # 🎉 First record
         if xp == gained_xp and level == 1:
-            await message.channel.send(f"🎉 {message.author.mention} started their journey at **Level 1**!")
+            await message.channel.send(f"🎉 {message.author.mention} started their journey at **Level 1**!\n⚠️ Currently in BETA so data reset may happen sometimes, sorry!")
 
         # 🔥 Level up
         elif xp == 0:
