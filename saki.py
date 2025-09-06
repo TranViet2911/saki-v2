@@ -30,7 +30,7 @@ async def on_ready():
     print(f"{bot.user.name} đã được khởi động!")
     try:
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} slash command(s) globally.")
+        print(f"Đã đồng bộ hóa {len(synced)} lệnh.")
     except Exception as e:
         print(f"Error syncing commands: {e}")
 
@@ -40,7 +40,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    # chỉ trigger nếu rena đc detect
+    # Only trigger if message is exactly "rena" (case-insensitive)
     if message.content.strip().lower() == "rena":
         await message.channel.send("gay")
 
@@ -52,6 +52,7 @@ async def main():
     await bot.load_extension('cogs.welcome')
     await bot.load_extension('cogs.afk')
     await bot.load_extension('cogs.level')
+    await bot.load_extension('cogs.economy')
     await bot.start(token)
 
 if __name__ == "__main__":
