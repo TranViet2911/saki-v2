@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import sqlite3
 import random
+import io
+from PIL import Image, ImageDraw, ImageFont
 
 XP_MIN = 10
 XP_MAX = 20
@@ -19,9 +21,11 @@ c.execute("""CREATE TABLE IF NOT EXISTS levels (
             )""")
 conn.commit()
 
+
 def get_user(user_id):
     c.execute("SELECT * FROM levels WHERE user_id = ?", (user_id,))
     return c.fetchone()
+
 
 def add_xp(user_id, xp):
     user = get_user(user_id)
@@ -45,18 +49,21 @@ def add_xp(user_id, xp):
             conn.commit()
             return current_level, new_xp
 
+
 def reset_user(user_id):
     c.execute("UPDATE levels SET xp = 0, level = 1 WHERE user_id = ?", (user_id,))
     conn.commit()
 
+
 def reset_all_users():
-    """Reset all users to Level 1 and 1 XP"""
     c.execute("UPDATE levels SET xp = 1, level = 1")
     conn.commit()
+
 
 def get_top_users(limit=10):
     c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
     return c.fetchall()
+
 
 # ------------------------------
 # PROGRESS BAR
@@ -79,15 +86,15 @@ class Leveling(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        
-        gained_xp = random.randint(XP_MIN, XP_MAX)  # 🎲 Random XP per message
+
+        gained_xp = random.randint(XP_MIN, XP_MAX)
         level, xp = add_xp(message.author.id, gained_xp)
 
-        # 🎉 First record
         if xp == gained_xp and level == 1:
-            await message.channel.send(f"🎉 {message.author.mention} started their journey at **Level 1**!\n⚠️ Currently in BETA so data reset may happen sometimes, sorry!")
+            await message.channel.send(
+                f"🎉 {message.author.mention} started their journey at **Level 1**!\n⚠️ Currently in BETA so data reset may happen sometimes, sorry!"
+            )
 
-        # 🔥 Level up
         elif xp == 0:
             c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
             all_users = [row[0] for row in c.fetchall()]
@@ -103,7 +110,7 @@ class Leveling(commands.Cog):
                     f"<a:trophy:1406253183227138078> Rank: {rank}\n"
                     f"{progress}"
                 ),
-                colour=0x00b0f4
+                colour=0x00b0f4,
             )
             embed.set_thumbnail(url=message.author.display_avatar.url)
             embed.set_footer(text="Saki 2.0 | Made by Groovy")
@@ -130,7 +137,6 @@ class Leveling(commands.Cog):
             xp_needed = level * LEVEL_UP_MULTIPLIER
             progress = make_progress_bar(xp, xp_needed)
 
-            # Calculate rank
             c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
             all_users = [row[0] for row in c.fetchall()]
             rank = all_users.index(member.id) + 1 if member.id in all_users else "N/A"
@@ -143,7 +149,7 @@ class Leveling(commands.Cog):
                     f"<:xp:1406259092309282978> {xp}/{xp_needed}\n"
                     f"{progress}"
                 ),
-                color=0x00b0f4
+                color=0x00b0f4,
             )
             embed.set_thumbnail(url=member.display_avatar.url)
             embed.set_footer(text="Saki 2.0 | Made by Groovy")
@@ -155,7 +161,9 @@ class Leveling(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def resetstat(self, interaction: discord.Interaction, member: discord.Member):
         reset_user(member.id)
-        await interaction.response.send_message(f"♻ {member.mention}'s stats have been reset to **Level 1** with **0 XP**.")
+        await interaction.response.send_message(
+            f"♻ {member.mention}'s stats have been reset to **Level 1** with **0 XP**."
+        )
 
     @discord.app_commands.command(name="resetall", description="Reset ALL users to Level 1 and 1 XP (Admin only)")
     @commands.has_permissions(administrator=True)
@@ -171,7 +179,7 @@ class Leveling(commands.Cog):
 
         embed = discord.Embed(
             title=f"🏆 {interaction.guild.name}'s Leaderboard",
-            color=discord.Color.gold()
+            color=discord.Color.gold(),
         )
         rank = 1
         for user_id, xp, level in top_users:
@@ -183,7 +191,7 @@ class Leveling(commands.Cog):
             embed.add_field(
                 name=f"#{rank} {name}",
                 value=f"⭐ Level {level} | <:xp:1406259092309282978> {xp}/{xp_needed}\n{progress}",
-                inline=False
+                inline=False,
             )
             rank += 1
 
@@ -191,6 +199,62 @@ class Leveling(commands.Cog):
             embed.set_thumbnail(url=interaction.guild.icon.url)
         embed.set_footer(text="Saki 2.0 | Made by Groovy")
         await interaction.response.send_message(embed=embed)
+
+    # ------------------------------
+    # RANK CARD
+    # ------------------------------
+    @discord.app_commands.command(name="rank", description="Show your rank card")
+    async def rank(self, interaction: discord.Interaction, member: discord.Member = None):
+        member = member or interaction.user
+        user = get_user(member.id)
+
+        if not user:
+            return await interaction.response.send_message(f"{member.mention} hasn’t started gaining XP yet!")
+
+        xp, level = user[1], user[2]
+        xp_needed = level * LEVEL_UP_MULTIPLIER
+
+        c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
+        all_users = [row[0] for row in c.fetchall()]
+        rank = all_users.index(member.id) + 1 if member.id in all_users else "N/A"
+        total_users = len(all_users)
+
+        # Create rank card
+        card_width, card_height = 600, 200
+        img = Image.new("RGB", (card_width, card_height), (30, 30, 30))
+        draw = ImageDraw.Draw(img)
+
+        try:
+            font_large = ImageFont.truetype("arial.ttf", 30)
+            font_small = ImageFont.truetype("arial.ttf", 20)
+        except:
+            font_large = ImageFont.load_default()
+            font_small = ImageFont.load_default()
+
+        avatar_bytes = await member.display_avatar.read()
+        avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA").resize((128, 128))
+
+        mask = Image.new("L", (128, 128), 0)
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.ellipse((0, 0, 128, 128), fill=255)
+        img.paste(avatar_img, (30, 36), mask)
+
+        draw.text((180, 40), member.name, font=font_large, fill=(255, 255, 255))
+        draw.text((180, 80), f"Level: {level}", font=font_small, fill=(255, 215, 0))
+        draw.text((180, 105), f"Rank: #{rank}/{total_users}", font=font_small, fill=(173, 216, 230))
+
+        bar_x, bar_y, bar_width, bar_height = 180, 140, 370, 30
+        progress = int((xp / xp_needed) * bar_width) if xp_needed > 0 else 0
+        draw.rectangle([bar_x, bar_y, bar_x + bar_width, bar_y + bar_height], fill=(50, 50, 50))
+        draw.rectangle([bar_x, bar_y, bar_x + progress, bar_y + bar_height], fill=(0, 176, 244))
+        draw.text((bar_x, bar_y - 25), f"XP: {xp}/{xp_needed}", font=font_small, fill=(200, 200, 200))
+
+        buffer = io.BytesIO()
+        img.save(buffer, "PNG")
+        buffer.seek(0)
+
+        file = discord.File(buffer, filename="rank.png")
+        await interaction.response.send_message(file=file)
 
 
 async def setup(bot):
