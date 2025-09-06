@@ -64,6 +64,12 @@ def get_top_users(limit=10):
     c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
     return c.fetchall()
 
+### UPDATE REWARD FOR LEVEL UP ###
+def update_wallet(user_id, amount):
+    user = get_economy_user(user_id)
+    new_wallet = user[1] + amount
+    c.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (new_wallet, user_id))
+    conn.commit()
 
 # ------------------------------
 # PROGRESS BAR
@@ -102,6 +108,9 @@ class Leveling(commands.Cog):
 
             xp_needed = level * LEVEL_UP_MULTIPLIER
             progress = make_progress_bar(xp, xp_needed)
+            
+            reward = 100
+            update_wallet(user_id, reward)
 
             embed = discord.Embed(
                 title="<:lightpinkflower:1406242431640277002> Level Up!",
@@ -109,6 +118,7 @@ class Leveling(commands.Cog):
                     f"{message.author.mention} leveled up to **Level {level}!**\n"
                     f"<a:trophy:1406253183227138078> Rank: {rank}\n"
                     f"{progress}"
+                    f"-# *+{reward}* <:crystal:1413851240412217395>"
                 ),
                 colour=0x00b0f4,
             )
