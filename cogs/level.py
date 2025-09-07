@@ -22,35 +22,39 @@ c.execute("""CREATE TABLE IF NOT EXISTS levels (
 conn.commit()
 
 
-def get_user(user_id):
+def get_user(user_id: int):
     c.execute("SELECT * FROM levels WHERE user_id = ?", (user_id,))
     return c.fetchone()
 
 
-def add_xp(user_id, xp):
+def add_xp(user_id: int, xp_gain: int):
     user = get_user(user_id)
     if user is None:
-        c.execute("INSERT INTO levels (user_id, xp, level) VALUES (?, ?, ?)", (user_id, xp, 1))
+        c.execute("INSERT INTO levels (user_id, xp, level) VALUES (?, ?, ?)", (user_id, xp_gain, 1))
         conn.commit()
-        return 1, xp
-    else:
-        current_xp, current_level = user[1], user[2]
-        new_xp = current_xp + xp
-        xp_needed = current_level * LEVEL_UP_MULTIPLIER
+        return 1, xp_gain, False, 0
 
-        if new_xp >= xp_needed:
-            new_level = current_level + 1
-            new_xp = new_xp - xp_needed
-            c.execute("UPDATE levels SET xp = ?, level = ? WHERE user_id = ?", (new_xp, new_level, user_id))
-            conn.commit()
-            return new_level, new_xp
-        else:
-            c.execute("UPDATE levels SET xp = ? WHERE user_id = ?", (new_xp, user_id))
-            conn.commit()
-            return current_level, new_xp
+    current_xp, current_level = user[1], user[2]
+    new_xp = current_xp + xp_gain
+    new_level = current_level
+    leveled_up = False
+
+    xp_needed = new_level * LEVEL_UP_MULTIPLIER
+    while new_xp >= xp_needed:
+        new_xp -= xp_needed
+        new_level += 1
+        leveled_up = True
+        xp_needed = new_level * LEVEL_UP_MULTIPLIER
+
+    if new_xp < 0:
+        new_xp = 0
+
+    c.execute("UPDATE levels SET xp = ?, level = ? WHERE user_id = ?", (new_xp, new_level, user_id))
+    conn.commit()
+    return new_level, new_xp, leveled_up, current_level
 
 
-def reset_user(user_id):
+def reset_user(user_id: int):
     c.execute("UPDATE levels SET xp = 0, level = 1 WHERE user_id = ?", (user_id,))
     conn.commit()
 
@@ -64,16 +68,23 @@ def get_top_users(limit=10):
     c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
     return c.fetchall()
 
-### UPDATE REWARD FOR LEVEL UP ###
-def update_wallet(user_id, amount):
-    user = get_economy_user(user_id)
-    new_wallet = user[1] + amount
-    c.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (new_wallet, user_id))
-    conn.commit()
 
-# ------------------------------
-# PROGRESS BAR
-# ------------------------------
+def update_wallet(user_id: int, amount: int):
+    try:
+        user = get_economy_user(user_id)  # provided by your economy module
+        if user is None:
+            c.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank, last_daily) VALUES (?, ?, ?, ?)",
+                      (user_id, 0, 0, None))
+            conn.commit()
+            user = (user_id, 0, 0, None)
+
+        new_wallet = user[1] + amount
+        c.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (new_wallet, user_id))
+        conn.commit()
+    except Exception as e:
+        print(f"[Economy] Skipped wallet update for {user_id}: {e}")
+
+
 def make_progress_bar(xp, xp_needed, length=10):
     progress = int((xp / xp_needed) * length) if xp_needed > 0 else 0
     bar = "▓" * progress + "░" * (length - progress)
@@ -85,51 +96,46 @@ class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # ------------------------------
-    # XP Gain Listener
-    # ------------------------------
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
 
         gained_xp = random.randint(XP_MIN, XP_MAX)
-        level, xp = add_xp(message.author.id, gained_xp)
+        level, xp, leveled_up, old_level = add_xp(message.author.id, gained_xp)
 
-        if xp == gained_xp and level == 1:
+        if old_level == 0 and level == 1 and xp == gained_xp:
             await message.channel.send(
-                f"🎉 {message.author.mention} started their journey at **Level 1**!\n⚠️ Currently in BETA so data reset may happen sometimes, sorry!"
+                f"🎉 {message.author.mention} started their journey at **Level 1**!\n"
+                f"⚠️ Currently in BETA so data reset may happen sometimes, sorry!"
             )
+            return
 
-        elif xp == 0:
+        if leveled_up:
             c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
             all_users = [row[0] for row in c.fetchall()]
-            rank = all_users.index(message.author.id) + 1
+            rank = all_users.index(message.author.id) + 1 if message.author.id in all_users else "N/A"
 
-            xp_needed = level * LEVEL_UP_MULTIPLIER
-            progress = make_progress_bar(xp, xp_needed)
-            
+            xp_needed_next = level * LEVEL_UP_MULTIPLIER
+            progress = make_progress_bar(xp, xp_needed_next)
+
             reward = 100
-            update_wallet(user_id, reward)
+            update_wallet(message.author.id, reward)
 
             embed = discord.Embed(
                 title="<:lightpinkflower:1406242431640277002> Level Up!",
                 description=(
                     f"{message.author.mention} leveled up to **Level {level}!**\n"
                     f"<a:trophy:1406253183227138078> Rank: {rank}\n"
-                    f"{progress}"
+                    f"{progress}\n"
                     f"-# *+{reward}* <:crystal:1413851240412217395>"
                 ),
                 colour=0x00b0f4,
             )
             embed.set_thumbnail(url=message.author.display_avatar.url)
             embed.set_footer(text="Saki 2.0 | Made by Groovy")
-
             await message.channel.send(embed=embed)
 
-    # ------------------------------
-    # Slash Commands
-    # ------------------------------
     @commands.Cog.listener()
     async def on_ready(self):
         try:
@@ -210,9 +216,6 @@ class Leveling(commands.Cog):
         embed.set_footer(text="Saki 2.0 | Made by Groovy")
         await interaction.response.send_message(embed=embed)
 
-    # ------------------------------
-    # RANK CARD
-    # ------------------------------
     @discord.app_commands.command(name="rank", description="Show your rank card")
     async def rank(self, interaction: discord.Interaction, member: discord.Member = None):
         member = member or interaction.user
@@ -229,7 +232,6 @@ class Leveling(commands.Cog):
         rank = all_users.index(member.id) + 1 if member.id in all_users else "N/A"
         total_users = len(all_users)
 
-        # Create rank card
         card_width, card_height = 600, 200
         img = Image.new("RGB", (card_width, card_height), (30, 30, 30))
         draw = ImageDraw.Draw(img)
@@ -265,6 +267,42 @@ class Leveling(commands.Cog):
 
         file = discord.File(buffer, filename="rank.png")
         await interaction.response.send_message(file=file)
+
+    @discord.app_commands.command(name="editxp", description="Edit a user's XP (Admin only)")
+    @commands.has_permissions(administrator=True)
+    async def editxp(self, interaction: discord.Interaction, member: discord.Member, amount: int):
+        if amount == 0:
+            return await interaction.response.send_message("⚠ Please provide a non-zero amount of XP.", ephemeral=True)
+
+        level, xp, leveled_up, old_level = add_xp(member.id, amount)
+        msg = f"✅ Gave **{amount} XP** to {member.mention}. They now have **{xp} XP** at **Level {level}**."
+
+        if leveled_up:
+            c.execute("SELECT user_id FROM levels ORDER BY level DESC, xp DESC")
+            all_users = [row[0] for row in c.fetchall()]
+            rank = all_users.index(member.id) + 1 if member.id in all_users else "N/A"
+
+            xp_needed_next = level * LEVEL_UP_MULTIPLIER
+            progress = make_progress_bar(xp, xp_needed_next)
+
+            reward = 100
+            update_wallet(member.id, reward)
+
+            embed = discord.Embed(
+                title="<:lightpinkflower:1406242431640277002> Level Up!",
+                description=(
+                    f"{member.mention} leveled up to **Level {level}!**\n"
+                    f"<a:trophy:1406253183227138078> Rank: {rank}\n"
+                    f"{progress}\n"
+                    f"-# *+{reward}* <:crystal:1413851240412217395>"
+                ),
+                colour=0x00b0f4,
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
+            embed.set_footer(text="Saki 2.0 | Made by Groovy")
+            await interaction.response.send_message(msg, embed=embed)
+        else:
+            await interaction.response.send_message(msg)
 
 
 async def setup(bot):
