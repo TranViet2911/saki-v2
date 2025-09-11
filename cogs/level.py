@@ -4,6 +4,7 @@ import sqlite3
 import random
 import io
 from PIL import Image, ImageDraw, ImageFont
+from economy import get_economy_user
 
 XP_MIN = 10
 XP_MAX = 20
