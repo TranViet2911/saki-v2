@@ -87,7 +87,7 @@ def update_wallet(user_id: int, amount: int):
             conn.commit()
             user = (user_id, 0, 0, None)
 
-        new_wallet = user[1] + reward
+        new_wallet = user[1] + amount
         c.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (new_wallet, user_id))
         conn.commit()
     except Exception as e:
