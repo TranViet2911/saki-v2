@@ -79,6 +79,9 @@ class Economy(commands.Cog):
         user_id = interaction.user.id
         reward = 300
 
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours=7)  # GMT+7
+        today_str = now.strftime("%Y-%m-%d")
+
         if can_claim_today(user_id):
             update_wallet(user_id, reward)
             set_daily(user_id)
@@ -93,15 +96,24 @@ class Economy(commands.Cog):
             await interaction.response.send_message(embed=embed)
 
         else:
+            # find next reset (midnight GMT+7)
+            tomorrow = now + datetime.timedelta(days=1)
+            reset_time = datetime.datetime.combine(tomorrow.date(), datetime.time.min)  # 00:00
+            remaining = reset_time - now
+
+            hours, remainder = divmod(int(remaining.total_seconds()), 3600)
+            minutes, _ = divmod(remainder, 60)
+
+            time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+
             embed = discord.Embed(
                 title="Not so fast!",
-                description="You have already claimed your daily reward today. Please come back tomorrow!",
-                color=discord.Color.red()
+                description=f"You have already claimed your daily reward today.\n"
+                            f"You can claim again in **{time_str}** ⏳",
+                color=discord.Color.blue()
             )
             embed.set_thumbnail(url=interaction.user.display_avatar.url)
-            embed.set_footer(text="Daily reward is reset at 12AM (GMT+7)")
             await interaction.response.send_message(embed=embed)
-
 
 async def setup(bot):
     await bot.add_cog(Economy(bot))
