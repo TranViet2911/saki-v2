@@ -4,7 +4,6 @@ import sqlite3
 import random
 import io
 from PIL import Image, ImageDraw, ImageFont
-from economy import get_economy_user
 
 XP_MIN = 10
 XP_MAX = 20
@@ -27,6 +26,15 @@ def get_user(user_id: int):
     c.execute("SELECT * FROM levels WHERE user_id = ?", (user_id,))
     return c.fetchone()
 
+def get_economy_user(user_id: int):
+    c.execute("SELECT * FROM economy WHERE user_id = ?", (user_id,))
+    user = c.fetchone()
+    if user is None:
+        c.execute("INSERT INTO economy (user_id, wallet, bank, last_daily) VALUES (?, ?, ?, ?)",
+                  (user_id, 0, 0, None))
+        conn.commit()
+        return (user_id, 0, 0, None)
+    return user
 
 def add_xp(user_id: int, xp_gain: int):
     user = get_user(user_id)
