@@ -3,6 +3,7 @@ from discord.ext import commands
 import sqlite3
 import random
 import datetime
+import json
 
 conn = sqlite3.connect("s2430_Saki.db")
 c = conn.cursor()
@@ -52,6 +53,11 @@ def can_claim_today(user_id):
         return True
     return result[0] != today
 
+### LOAD SHOP FROM JSON FILE ###
+
+def load_shop{}
+    with open("shop.json", "r", encoding="utf-8") as f:
+        return json.load(f)        
 
 ### BALANCE COMMAND ###
 class Economy(commands.Cog):
@@ -115,5 +121,23 @@ class Economy(commands.Cog):
             embed.set_thumbnail(url=interaction.user.display_avatar.url)
             await interaction.response.send_message(embed=embed)
 
+### SHOP ###
+    @discord.app_commands.command(name="shop", description="Browse the shop for some stuff")
+        async def shop(self, interaction=discord.Interaction):
+            item = load_shop()
+            
+            embed = discord.Embed(
+            title="🍉Shop",
+            description="Here are these items you can buy in shop",
+            color= discord.color.Blue()
+        )
+        
+        for item in items:
+            embed.add_field(
+                name=f"{item['id'']}. {item['name'']} - {item['price'']} <:crystal:1413851240412217395>",
+                value=item['description'],
+                inline=False
+        )
+        await interaction.response.send_message(embed=embed)
 async def setup(bot):
     await bot.add_cog(Economy(bot))
