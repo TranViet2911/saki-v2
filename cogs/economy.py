@@ -55,7 +55,7 @@ def can_claim_today(user_id):
 
 ### LOAD SHOP FROM JSON FILE ###
 
-def load_shop{}
+def load_shop():
     with open("shop.json", "r", encoding="utf-8") as f:
         return json.load(f)        
 
