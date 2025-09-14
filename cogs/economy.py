@@ -125,9 +125,9 @@ class Economy(commands.Cog):
     @discord.app_commands.command(name="shop", description="Browse the shop for some stuff")
     async def shop(self, interaction: discord.Interaction):
             items = load_shop()
-        if not items:
-         await interaction.response.send_message("⚠️ The shop is empty!", ephemeral=True)
-         return
+    if not items:
+        await interaction.response.send_message("⚠️ The shop is empty!", ephemeral=True)
+        return
 
         embed = discord.Embed(
             title="🍉 Shop",
