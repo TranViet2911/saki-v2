@@ -141,7 +141,6 @@ class Economy(commands.Cog):
                 value=item['description'],
                 inline=False
             )
-         embed.set_thumbnail(url=interaction.guild.icon.url)
         await interaction.response.send_message(embed=embed)
 async def setup(bot):
     await bot.add_cog(Economy(bot))
