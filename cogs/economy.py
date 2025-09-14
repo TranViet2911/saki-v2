@@ -122,7 +122,7 @@ class Economy(commands.Cog):
             await interaction.response.send_message(embed=embed)
 
 ### SHOP ###
-@discord.app_commands.command(name="shop", description="Browse the shop for some stuff")
+    @discord.app_commands.command(name="shop", description="Browse the shop for some stuff")
     async def shop(self, interaction: discord.Interaction):
         items = load_shop()
 
