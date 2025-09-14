@@ -126,8 +126,8 @@ class Economy(commands.Cog):
     async def shop(self, interaction: discord.Interaction):
             items = load_shop()
     if not items:
-        await interaction.response.send_message("⚠️ The shop is empty!", ephemeral=True)
-        return
+    await interaction.response.send_message("⚠️ The shop is empty!", ephemeral=True)
+    return
 
         embed = discord.Embed(
             title="🍉 Shop",
