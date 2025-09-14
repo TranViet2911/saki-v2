@@ -122,22 +122,23 @@ class Economy(commands.Cog):
             await interaction.response.send_message(embed=embed)
 
 ### SHOP ###
-    @discord.app_commands.command(name="shop", description="Browse the shop for some stuff")
-        async def shop(self, interaction=discord.Interaction):
-            item = load_shop()
-            
-            embed = discord.Embed(
-            title="🍉Shop",
-            description="Here are these items you can buy in shop",
-            color= discord.color.Blue()
+@discord.app_commands.command(name="shop", description="Browse the shop for some stuff")
+    async def shop(self, interaction: discord.Interaction):
+        items = load_shop()
+
+        embed = discord.Embed(
+            title="🍉 Shop",
+            description="Here are the items you can buy:",
+            color=discord.Color.blue()
         )
-        
+
         for item in items:
             embed.add_field(
-                name=f"{item['id'']}. {item['name'']} - {item['price'']} <:crystal:1413851240412217395>",
+                name=f"{item['id']}. {item['name']} — {item['price']} <:crystal:1413851240412217395>",
                 value=item['description'],
                 inline=False
-        )
+            )
+
         await interaction.response.send_message(embed=embed)
 async def setup(bot):
     await bot.add_cog(Economy(bot))
