@@ -134,3 +134,47 @@ def make_progress_bar(xp, xp_needed, length=10):
     bar = "▓" * progress + "░" * (length - progress)
     percent = int((xp / xp_needed) * 100) if xp_needed > 0 else 0
     return f"{bar} {percent}%"
+    
+def get_user(user_id: int):
+    c.execute("SELECT * FROM levels WHERE user_id = ?", (user_id,))
+    return c.fetchone()
+
+def get_economy_user(user_id: int):
+    c.execute("SELECT * FROM economy WHERE user_id = ?", (user_id,))
+    user = c.fetchone()
+    if user is None:
+        c.execute("INSERT INTO economy (user_id, wallet, bank, last_daily) VALUES (?, ?, ?, ?)",
+                  (user_id, 0, 0, None))
+        conn.commit()
+        return (user_id, 0, 0, None)
+    return user
+    
+def reset_user(user_id: int):
+    c.execute("UPDATE levels SET xp = 0, level = 1 WHERE user_id = ?", (user_id,))
+    conn.commit()
+
+
+def reset_all_users():
+    c.execute("UPDATE levels SET xp = 1, level = 1")
+    conn.commit()
+
+
+def get_top_users(limit=10):
+    c.execute("SELECT * FROM levels ORDER BY level DESC, xp DESC LIMIT ?", (limit,))
+    return c.fetchall()
+
+
+def update_wallet(user_id: int, amount: int):
+    try:
+        user = get_economy_user(user_id)  # provided by your economy module
+        if user is None:
+            c.execute("INSERT OR IGNORE INTO economy (user_id, wallet, bank, last_daily) VALUES (?, ?, ?, ?)",
+                      (user_id, 0, 0, None))
+            conn.commit()
+            user = (user_id, 0, 0, None)
+
+        new_wallet = user[1] + amount
+        c.execute("UPDATE economy SET wallet = ? WHERE user_id = ?", (new_wallet, user_id))
+        conn.commit()
+    except Exception as e:
+        print(f"[Economy] Skipped wallet update for {user_id}: {e}")
