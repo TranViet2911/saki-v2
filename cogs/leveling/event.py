@@ -4,7 +4,7 @@ import random
 from .database import XP_MIN, XP_MAX, add_xp, make_progress_bar, update_wallet, LEVEL_UP_MULTIPLIER, get_top_users
 
 
-class LevelEvent(commands.Cogs):
+class LevelEvent(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 # Event
