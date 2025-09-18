@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import json
+from .database import load_shop
 
 class EconomyShopList(commands.Cog):
     def __init__ (self, bot):
