@@ -2,6 +2,7 @@ import datetime
 from discord.ext import commands
 import discord
 from .database import set_daily, can_claim_today, update_wallet, get_economy_user
+import json
 
 class EconomyDaily(commands.Cog):
     def __init__ (self, bot):
