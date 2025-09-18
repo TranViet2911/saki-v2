@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from .db import reset_user, reset_all_users, add_xp, update_wallet, LEVEL_UP_MULTIPLIER, make_progress_bar
+from .database import reset_user, reset_all_users, add_xp, update_wallet, LEVEL_UP_MULTIPLIER, make_progress_bar
 
 class LevelAdmin(commands.Cog):
     def __init__(self, bot):

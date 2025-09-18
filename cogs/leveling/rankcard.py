@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import io
 from PIL import Image, ImageDraw, ImageFont
-from .db import get_user, LEVEL_UP_MULTIPLIER
+from .database import get_user, LEVEL_UP_MULTIPLIER
 
 class LevelRankCard(commands.Cog):
     def __init__(self, bot):
