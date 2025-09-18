@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import io
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from .database import get_user, LEVEL_UP_MULTIPLIER, get_top_users, get_global_boost, get_user_boost, get_role_boost, get_temp_boost
+from .db import get_user, LEVEL_UP_MULTIPLIER, get_top_users, get_global_boost, get_user_boost, get_role_boost, get_temp_boost
 
 class LevelRankCard(commands.Cog):
     def __init__(self, bot):
@@ -32,68 +32,64 @@ class LevelRankCard(commands.Cog):
         # -------------------------------
         # Create Image
         # -------------------------------
-        card_width, card_height = 700, 220
+        card_width, card_height = 750, 250
         img = Image.new("RGB", (card_width, card_height), (25, 25, 25))
         draw = ImageDraw.Draw(img)
 
         # Gradient background
         for y in range(card_height):
-            r = int(30 + (80 - 30) * (y / card_height))
-            g = int(30 + (40 - 30) * (y / card_height))
-            b = int(50 + (120 - 50) * (y / card_height))
+            r = int(40 + (100 - 40) * (y / card_height))
+            g = int(30 + (60 - 30) * (y / card_height))
+            b = int(60 + (140 - 60) * (y / card_height))
             draw.line([(0, y), (card_width, y)], fill=(r, g, b))
 
         # Avatar with glow
         avatar_bytes = await member.display_avatar.read()
-        avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA").resize((128, 128))
+        avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA").resize((150, 150))
 
-        mask = Image.new("L", (128, 128), 0)
+        mask = Image.new("L", (150, 150), 0)
         mask_draw = ImageDraw.Draw(mask)
-        mask_draw.ellipse((0, 0, 128, 128), fill=255)
+        mask_draw.ellipse((0, 0, 150, 150), fill=255)
 
-        # Glow effect
-        glow = Image.new("RGBA", (140, 140), (0, 0, 0, 0))
+        glow = Image.new("RGBA", (170, 170), (0, 0, 0, 0))
         glow_draw = ImageDraw.Draw(glow)
-        glow_draw.ellipse((0, 0, 140, 140), fill=(0, 176, 244, 120))
-        glow = glow.filter(ImageFilter.GaussianBlur(10))
-        img.paste(glow, (25, 30), glow)
+        glow_draw.ellipse((0, 0, 170, 170), fill=(0, 176, 244, 120))
+        glow = glow.filter(ImageFilter.GaussianBlur(12))
+        img.paste(glow, (25, 40), glow)
+        img.paste(avatar_img, (35, 50), mask)
 
-        # Paste avatar
-        img.paste(avatar_img, (30, 36), mask)
-
-        # Fonts
+        # Fonts (use a better .ttf if available in your project folder)
         try:
-            font_big = ImageFont.truetype("arial.ttf", 32)
-            font_med = ImageFont.truetype("arial.ttf", 22)
-            font_small = ImageFont.truetype("arial.ttf", 18)
+            font_big = ImageFont.truetype("arialbd.ttf", 40)   # bold username
+            font_med = ImageFont.truetype("arial.ttf", 28)     # level / rank
+            font_small = ImageFont.truetype("arial.ttf", 24)   # XP / multiplier
         except:
             font_big = ImageFont.load_default()
             font_med = ImageFont.load_default()
             font_small = ImageFont.load_default()
 
-        # Username & Level
-        draw.text((180, 40), member.name, font=font_big, fill=(255, 255, 255))
-        draw.text((180, 80), f"⭐ Level {level}", font=font_med, fill=(255, 215, 0))
-        draw.text((180, 110), f"🏆 Rank #{rank_pos}/{total_users}", font=font_med, fill=(173, 216, 230))
+        # Username
+        draw.text((220, 50), member.name, font=font_big, fill=(255, 255, 255))
 
-        # XP Progress Bar
-        bar_x, bar_y, bar_width, bar_height = 180, 160, 480, 30
+        # Level & Rank
+        draw.text((220, 100), f"⭐ Level {level}", font=font_med, fill=(255, 215, 0))
+        draw.text((220, 140), f"🏆 Rank #{rank_pos}/{total_users}", font=font_med, fill=(173, 216, 230))
+
+        # Progress bar
+        bar_x, bar_y, bar_width, bar_height = 220, 180, 480, 35
         progress = int((xp / xp_needed) * bar_width) if xp_needed > 0 else 0
 
-        # Background bar
-        draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_width, bar_y + bar_height], 
-                               radius=15, fill=(50, 50, 50))
-
-        # Progress bar (blue glow)
+        draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_width, bar_y + bar_height],
+                               radius=18, fill=(50, 50, 50))
         progress_bar = Image.new("RGBA", (progress, bar_height), (0, 176, 244, 255))
         progress_bar = progress_bar.filter(ImageFilter.GaussianBlur(1))
         img.paste(progress_bar, (bar_x, bar_y), progress_bar)
 
         # XP Text
-        draw.text((bar_x, bar_y - 25), f"XP: {xp}/{xp_needed}", font=font_small, fill=(230, 230, 230))
+        draw.text((bar_x, bar_y - 30), f"XP: {xp}/{xp_needed}", font=font_small, fill=(230, 230, 230))
 
-        # Active Boosts
-        draw.text((bar_x, bar_y + 40), f"⚡ Multiplier: x{boost_mult:.2f}", font=font_small, fill=(200, 180, 255))
+        # Multiplier
+        draw.text((bar_x, bar_y + 45), f"⚡ Multiplier: x{boost_mult:.2f}", font=font_small, fill=(200, 180, 255))
 
         # Export
         buffer = io.BytesIO()
