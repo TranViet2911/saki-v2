@@ -51,7 +51,7 @@ async def main():
     await bot.load_extension('cogs.ping')
     await bot.load_extension('cogs.welcome')
     await bot.load_extension('cogs.afk')
-    await bot.load_extension('cogs.level')
+    await bot.load_extension('cogs.leveling')
     await bot.load_extension('cogs.economy')
     await bot.start(token)
 
