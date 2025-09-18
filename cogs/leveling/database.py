@@ -128,3 +128,9 @@ def add_xp(user_id: int, xp_gain: int, member=None):
     c.execute("UPDATE levels SET xp = ?, level = ? WHERE user_id = ?", (new_xp, new_level, user_id))
     conn.commit()
     return new_level, new_xp, leveled_up, current_level
+    
+def make_progress_bar(xp, xp_needed, length=10):
+    progress = int((xp / xp_needed) * length) if xp_needed > 0 else 0
+    bar = "▓" * progress + "░" * (length - progress)
+    percent = int((xp / xp_needed) * 100) if xp_needed > 0 else 0
+    return f"{bar} {percent}%"
