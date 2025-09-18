@@ -32,7 +32,7 @@ class LevelRankCard(commands.Cog):
         # -------------------------------
         # Create Image
         # -------------------------------
-        card_width, card_height = 750, 250
+        card_width, card_height = 1000, 300
         img = Image.new("RGB", (card_width, card_height), (25, 25, 25))
         draw = ImageDraw.Draw(img)
 
@@ -45,51 +45,51 @@ class LevelRankCard(commands.Cog):
 
         # Avatar with glow
         avatar_bytes = await member.display_avatar.read()
-        avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA").resize((150, 150))
+        avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA").resize((200, 200))
 
-        mask = Image.new("L", (150, 150), 0)
+        mask = Image.new("L", (200, 200), 0)
         mask_draw = ImageDraw.Draw(mask)
-        mask_draw.ellipse((0, 0, 150, 150), fill=255)
+        mask_draw.ellipse((0, 0, 200, 200), fill=255)
 
-        glow = Image.new("RGBA", (170, 170), (0, 0, 0, 0))
+        glow = Image.new("RGBA", (230, 230), (0, 0, 0, 0))
         glow_draw = ImageDraw.Draw(glow)
-        glow_draw.ellipse((0, 0, 170, 170), fill=(0, 176, 244, 120))
-        glow = glow.filter(ImageFilter.GaussianBlur(12))
-        img.paste(glow, (25, 40), glow)
-        img.paste(avatar_img, (35, 50), mask)
+        glow_draw.ellipse((0, 0, 230, 230), fill=(0, 176, 244, 120))
+        glow = glow.filter(ImageFilter.GaussianBlur(15))
+        img.paste(glow, (40, 50), glow)
+        img.paste(avatar_img, (50, 60), mask)
 
-        # Fonts (use a better .ttf if available in your project folder)
+        # Fonts (replace with a nice .ttf if available)
         try:
-            font_big = ImageFont.truetype("arialbd.ttf", 40)   # bold username
-            font_med = ImageFont.truetype("arial.ttf", 28)     # level / rank
-            font_small = ImageFont.truetype("arial.ttf", 24)   # XP / multiplier
+            font_big = ImageFont.truetype("arialbd.ttf", 56)   # bold username
+            font_med = ImageFont.truetype("arial.ttf", 36)     # level / rank
+            font_small = ImageFont.truetype("arial.ttf", 30)   # XP / multiplier
         except:
             font_big = ImageFont.load_default()
             font_med = ImageFont.load_default()
             font_small = ImageFont.load_default()
 
         # Username
-        draw.text((220, 50), member.name, font=font_big, fill=(255, 255, 255))
+        draw.text((300, 70), member.name, font=font_big, fill=(255, 255, 255))
 
         # Level & Rank
-        draw.text((220, 100), f"⭐ Level {level}", font=font_med, fill=(255, 215, 0))
-        draw.text((220, 140), f"🏆 Rank #{rank_pos}/{total_users}", font=font_med, fill=(173, 216, 230))
+        draw.text((300, 140), f"⭐ Level {level}", font=font_med, fill=(255, 215, 0))
+        draw.text((300, 190), f"🏆 Rank #{rank_pos}/{total_users}", font=font_med, fill=(173, 216, 230))
 
         # Progress bar
-        bar_x, bar_y, bar_width, bar_height = 220, 180, 480, 35
+        bar_x, bar_y, bar_width, bar_height = 300, 230, 650, 45
         progress = int((xp / xp_needed) * bar_width) if xp_needed > 0 else 0
 
         draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_width, bar_y + bar_height],
-                               radius=18, fill=(50, 50, 50))
+                               radius=22, fill=(50, 50, 50))
         progress_bar = Image.new("RGBA", (progress, bar_height), (0, 176, 244, 255))
         progress_bar = progress_bar.filter(ImageFilter.GaussianBlur(1))
         img.paste(progress_bar, (bar_x, bar_y), progress_bar)
 
         # XP Text
-        draw.text((bar_x, bar_y - 30), f"XP: {xp}/{xp_needed}", font=font_small, fill=(230, 230, 230))
+        draw.text((bar_x, bar_y - 40), f"XP: {xp}/{xp_needed}", font=font_small, fill=(230, 230, 230))
 
         # Multiplier
-        draw.text((bar_x, bar_y + 45), f"⚡ Multiplier: x{boost_mult:.2f}", font=font_small, fill=(200, 180, 255))
+        draw.text((bar_x, bar_y + 55), f"⚡ Multiplier: x{boost_mult:.2f}", font=font_small, fill=(200, 180, 255))
 
         # Export
         buffer = io.BytesIO()
