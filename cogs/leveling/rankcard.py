@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 import io
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from .db import get_user, LEVEL_UP_MULTIPLIER, get_top_users
-from .db import get_global_boost, get_user_boost, get_role_boost, get_temp_boost
+from .database import get_user, LEVEL_UP_MULTIPLIER, get_top_users
+from .database import get_global_boost, get_user_boost, get_role_boost, get_temp_boost
 
 class LevelRankCard(commands.Cog):
     def __init__(self, bot):
