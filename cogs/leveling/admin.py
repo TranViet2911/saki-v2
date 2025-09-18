@@ -45,15 +45,6 @@ class LevelAdmin(commands.Cog):
         else:
             await interaction.response.send_message(msg)
 
-import discord
-from discord.ext import commands
-from .db import *
-from .db import LEVEL_UP_MULTIPLIER, make_progress_bar, update_wallet
-
-class LevelAdmin(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
     # Global Boost
     @discord.app_commands.command(name="setxpboost", description="Set a global XP multiplier (Admin only)")
     @commands.has_permissions(administrator=True)
