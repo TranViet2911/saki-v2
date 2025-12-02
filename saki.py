@@ -42,7 +42,7 @@ async def on_message(message):
 
     # Only trigger if message is exactly "rena" (case-insensitive)
     if message.content.strip().lower() == "rena":
-        await message.channel.send("gay")
+        await message.channel.send("gay\ngay\ngay\ngay")
 
     await bot.process_commands(message)
 
@@ -53,6 +53,7 @@ async def main():
     await bot.load_extension('cogs.afk')
     await bot.load_extension('cogs.leveling')
     await bot.load_extension('cogs.economy')
+    await bot.load_extension('cogs.cookie')
     await bot.start(token)
 
 if __name__ == "__main__":
