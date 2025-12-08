@@ -26,7 +26,7 @@ class Cookie(commands.Cog):
         random_text = random.choice(cookies)
 
         embed = discord.Embed(
-            title="🥠 # Fortune Cookie #",
+            title="🥠 Fortune Cookie ",
             description=f"{interaction.user.mention}, bánh quy may mắn nói với bạn rằng: \n\n{random_text}",
             color=discord.Color.blue()
         )
