@@ -9,7 +9,7 @@ from discord import app_commands
 # Load the bot
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
-
+print(discord.__version__)
 # Setup Logging
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 logging.basicConfig(level=logging.DEBUG, handlers=[handler])
@@ -54,6 +54,7 @@ async def main():
     await bot.load_extension('cogs.leveling')
     await bot.load_extension('cogs.economy')
     await bot.load_extension('cogs.cookie')
+    await bot.load_extension('cogs.daily_messsage')
     await bot.start(token)
 
 if __name__ == "__main__":
