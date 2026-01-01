@@ -9,41 +9,35 @@ def load_omikuji():
         return json.load(f)
 
 
-class OmikujiView(discord.ui.View):
-    def __init__(self, user: discord.User):
-        super().__init__(timeout=60)  # nút tồn tại 60s
-        self.user = user
+class RerollView(discord.ui.View):
+    def __init__(self, user_id: int):
+        super().__init__(timeout=60)
+        self.user_id = user_id
 
-    @discord.ui.button(label="🔁 Gieo lại", style=discord.ButtonStyle.primary)
-    async def reroll(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ):
-        # chỉ cho người đã gieo quẻ dùng
-        if interaction.user.id != self.user.id:
+    @discord.ui.button(label="🔄 Gieo lại", style=discord.ButtonStyle.primary)
+    async def reroll(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+        if interaction.user.id != self.user_id:
             await interaction.response.send_message(
-                "❌ Bạn không phải người đã gieo quẻ này!",
+                "❌ Bạn không thể gieo quẻ thay người khác!",
                 ephemeral=True
             )
             return
 
         data = load_omikuji()
-
         key = random.choice(list(data.keys()))
-        quẻ = data[key]
-        message = random.choice(quẻ["messages"])
+        que = data[key]
+        message = random.choice(que["messages"])
 
         embed = discord.Embed(
-            title=f"🎐 Kết quả gieo quẻ: {quẻ['name']}",
+            title=f"🎐 Kết quả gieo quẻ: {que['name']}",
             description=(
                 f"{interaction.user.mention}\n\n"
                 f"📜 **Lời quẻ:**\n{message}"
             ),
-            color=quẻ["color"]
+            color=que["color"]
         )
-
-        embed.set_footer(text="⛩️ Omikuji – Chúc bạn một năm bình an")
+        embed.set_footer(text="⛩️ Omikuji – Gieo quẻ đầu năm")
 
         await interaction.response.edit_message(embed=embed, view=self)
 
@@ -53,34 +47,29 @@ class Omikuji(commands.Cog):
         self.bot = bot
 
     @discord.app_commands.command(
-        name="gieoque",
-        description="Gieo quẻ đầu năm như chùa Nhật Bản"
+        name="omikuji",
+        description="🎐 Gieo quẻ đầu năm như chùa Nhật Bản"
     )
-    async def gieoque(self, interaction: discord.Interaction):
+    async def omikuji(self, interaction: discord.Interaction):
 
         data = load_omikuji()
-
         key = random.choice(list(data.keys()))
-        quẻ = data[key]
-        message = random.choice(quẻ["messages"])
+        que = data[key]
+        message = random.choice(que["messages"])
 
         embed = discord.Embed(
-            title=f"🎐 Kết quả gieo quẻ: {quẻ['name']}",
+            title=f"🎐 Kết quả gieo quẻ: {que['name']}",
             description=(
                 f"{interaction.user.mention}\n\n"
                 f"📜 **Lời quẻ:**\n{message}"
             ),
-            color=quẻ["color"]
+            color=que["color"]
         )
-
         embed.set_footer(text="⛩️ Omikuji – Chúc bạn một năm bình an")
 
-        view = OmikujiView(interaction.user)
+        view = RerollView(interaction.user.id)
 
-        await interaction.response.send_message(
-            embed=embed,
-            view=view
-        )
+        await interaction.response.send_message(embed=embed, view=view)
 
 
 async def setup(bot):
