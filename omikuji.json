@@ -1,0 +1,47 @@
+{
+  "omikuji": {
+    "name": "大吉 – Đại Cát",
+    "color": 16766720,
+    "messages": [
+      "Mọi việc đều hanh thông, tài lộc dồi dào.",
+      "Một năm đầy may mắn và cơ hội đang chờ bạn.",
+      "Tình duyên, sự nghiệp đều tiến triển tốt."
+    ]
+  },
+  "chukichi": {
+    "name": "中吉 – Trung Cát",
+    "color": 5763719,
+    "messages": [
+      "Kết quả tốt sẽ đến nếu bạn kiên trì.",
+      "Có quý nhân phù trợ trong năm nay.",
+      "Cẩn thận một chút, mọi việc sẽ ổn."
+    ]
+  },
+  "shokichi": {
+    "name": "小吉 – Tiểu Cát",
+    "color": 3447003,
+    "messages": [
+      "Bình an là điều quý giá nhất.",
+      "Niềm vui nhỏ sẽ đến bất ngờ.",
+      "Không quá nổi bật nhưng ổn định."
+    ]
+  },
+  "suekichi": {
+    "name": "末吉 – Mạt Cát",
+    "color": 10181046,
+    "messages": [
+      "Ban đầu có khó khăn, cuối cùng sẽ tốt.",
+      "Đừng vội nản lòng.",
+      "Kiên nhẫn là chìa khóa của bạn."
+    ]
+  },
+  "kyo": {
+    "name": "凶 – Hung",
+    "color": 15158332,
+    "messages": [
+      "Năm nay nên cẩn trọng trong quyết định.",
+      "Tránh nóng vội, giữ bình tĩnh.",
+      "Hung hóa cát nếu biết tu tâm."
+    ]
+  }
+}

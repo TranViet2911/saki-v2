@@ -55,6 +55,7 @@ async def main():
     await bot.load_extension('cogs.economy')
     await bot.load_extension('cogs.cookie')
     await bot.load_extension('cogs.daily_messsage')
+    await bot.loaf_extension('cogs.omikuji')
     await bot.start(token)
 
 if __name__ == "__main__":
