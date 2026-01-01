@@ -35,13 +35,34 @@
       "Kiên nhẫn là chìa khóa của bạn."
     ]
   },
+
+  /* ===== QUẺ HUNG ===== */
+
   "kyo": {
     "name": "凶 – Hung",
     "color": 15158332,
     "messages": [
-      "Năm nay nên cẩn trọng trong quyết định.",
+      "Năm nay nên cẩn trọng trong mọi quyết định.",
       "Tránh nóng vội, giữ bình tĩnh.",
       "Hung hóa cát nếu biết tu tâm."
+    ]
+  },
+  "daikyo": {
+    "name": "大凶 – Đại Hung",
+    "color": 10038562,
+    "messages": [
+      "Một năm nhiều thử thách, cần hết sức cẩn trọng.",
+      "Tránh đầu tư mạo hiểm hoặc quyết định lớn.",
+      "Kiên nhẫn và khiêm tốn sẽ giúp bạn vượt qua."
+    ]
+  },
+  "hankyo": {
+    "name": "半凶 – Bán Hung",
+    "color": 15105570,
+    "messages": [
+      "Có điều không thuận, nhưng chưa đến mức xấu.",
+      "Cẩn trọng lời nói và hành động.",
+      "Biết dừng đúng lúc sẽ tránh tai họa."
     ]
   }
 }
